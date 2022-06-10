@@ -10,6 +10,8 @@ import java.util.List;
 
 public class Lox {
     static boolean hadError = false;
+    private static final Interpreter interpreter = new Interpreter();
+
 
     public static void main(String[] args) throws IOException {
         if(args.length > 1){
@@ -51,12 +53,16 @@ public class Lox {
 //        }
 
         Parser parser = new Parser(tokens);
-        Expr expression = parser.parse();
-
-        // Stop if there was a syntax error.
+//        Expr expression = parser.parse();
+//
+//        // Stop if there was a syntax error.
         if (hadError) return;
+//
+//        System.out.println(new AstPrinter().print(expression));
+        List<Stmt> statements = parser.parse();
+        interpreter.interpret(statements);
 
-        System.out.println(new AstPrinter().print(expression));
+
     }
 
     static void error(int line, String message) {
