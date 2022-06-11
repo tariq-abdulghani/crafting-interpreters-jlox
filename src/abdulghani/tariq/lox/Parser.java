@@ -3,6 +3,22 @@ import java.util.ArrayList;
 import java.util.List;
 import static abdulghani.tariq.lox.TokenType.*;
 
+
+/**
+ statement      → exprStmt
+ | printStmt
+ | block ;
+
+ block          → "{" declaration* "}" ;
+ */
+
+/**
+ * assignment
+ * **************************************************
+ expression     → assignment ;
+ assignment     → IDENTIFIER "=" assignment
+ | equality ;
+ */
 /**
  * new modified grammar to allow declaring variables
  program        → declaration* EOF ;
@@ -75,16 +91,16 @@ public class Parser {
     List<Stmt> parse() {
         List<Stmt> statements = new ArrayList<>();
         while (!isAtEnd()) {
-//            statements.add(statement());
             statements.add(declaration());
-
         }
 
         return statements;
     }
 
     private Expr expression() {
-        return equality();
+//        return equality();
+        return assignment();
+
     }
 
     private Expr equality() {
@@ -204,11 +220,45 @@ public class Parser {
         return new ParseError();
     }
 
+    private void synchronize() {
+        advance();
+
+        while (!isAtEnd()) {
+            if (previous().type == SEMICOLON) return;
+
+            switch (peek().type) {
+                case CLASS:
+                case FUN:
+                case VAR:
+                case FOR:
+                case IF:
+                case WHILE:
+                case PRINT:
+                case RETURN:
+                    return;
+            }
+
+            advance();
+        }
+    }
+
 // statements parsing
     private Stmt statement() {
         if (match(PRINT)) return printStatement();
+        if (match(LEFT_BRACE)) return new Stmt.Block(block());
 
         return expressionStatement();
+    }
+
+    private List<Stmt> block() {
+        List<Stmt> statements = new ArrayList<>();
+
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
+            statements.add(declaration());
+        }
+
+        consume(RIGHT_BRACE, "Expect '}' after block.");
+        return statements;
     }
 
     private Stmt printStatement() {
@@ -223,14 +273,32 @@ public class Parser {
         return new Stmt.Expression(expr);
     }
 
+    private Expr assignment() {
+        Expr expr = equality();
+
+        if (match(EQUAL)) {
+            Token equals = previous();
+            Expr value = assignment();
+
+            if (expr instanceof Expr.Variable) {
+                Token name = ((Expr.Variable)expr).name;
+                return new Expr.Assign(name, value);
+            }
+
+            error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
+    }
+
     private Stmt declaration() {
         try {
             if (match(VAR)) return varDeclaration();
 
             return statement();
         } catch (ParseError error) {
-//            synchronize();
-            return null;
+            synchronize();
+            return null; // makes problem when u return null so it needs guard.
         }
     }
 

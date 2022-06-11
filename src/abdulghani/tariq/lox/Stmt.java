@@ -1,11 +1,12 @@
 package abdulghani.tariq.lox;
 
 import java.beans.Expression;
+import java.util.List;
 import java.util.function.Function;
 
 abstract class Stmt {
     interface Visitor<R> {
-//        R visitBlockStmt(Block stmt);
+        R visitBlockStmt(Block stmt);
 //        R visitClassStmt(Class stmt);
         R visitExpressionStmt(Expression stmt);
 //        R visitFunctionStmt(Function stmt);
@@ -60,5 +61,18 @@ abstract class Stmt {
 
         final Token name;
         final Expr initializer;
+    }
+
+    static class Block extends Stmt {
+        Block(List<Stmt> statements) {
+            this.statements = statements;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitBlockStmt(this);
+        }
+
+        final List<Stmt> statements;
     }
 }
