@@ -296,7 +296,7 @@ public class Parser {
     }
 
     private Expr assignment() {
-        Expr expr = equality();
+        Expr expr = or();
 
         if (match(EQUAL)) {
             Token equals = previous();
@@ -311,6 +311,28 @@ public class Parser {
         }
 
         return expr;
+    }
+
+    // logic_or       → logic_and ( "or" logic_and )* ;
+    private Expr or(){
+        Expr left = and();
+        while (match(OR)){
+            Token operator = previous();
+            Expr right = and();
+            left = new Expr.Logical(left, operator, right);
+        }
+        return left;
+    }
+
+    // logic_and      → equality ( "and" equality )* ;
+    private Expr and(){
+        Expr expr = equality();
+        while (match(AND)){
+            Token operator = previous();
+            Expr right = equality();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+        return  expr;
     }
 
     private Stmt declaration() {
