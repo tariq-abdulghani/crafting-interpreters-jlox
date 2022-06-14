@@ -3,6 +3,27 @@ import java.util.ArrayList;
 import java.util.List;
 import static abdulghani.tariq.lox.TokenType.*;
 
+/**
+ * Logical Operator
+ *
+ * expression     → assignment ;
+ * assignment     → IDENTIFIER "=" assignment
+ *                | logic_or ;
+ * logic_or       → logic_and ( "or" logic_and )* ;
+ * logic_and      → equality ( "and" equality )* ;
+ */
+
+/**
+ * Control Flow
+ * statement      → exprStmt
+ *                | ifStmt
+ *                | printStmt
+ *                | block ;
+ *
+ * ifStmt         → "if" "(" expression ")" statement
+ *                ( "else" statement )? ;
+ */
+
 
 /**
  statement      → exprStmt
@@ -244,6 +265,7 @@ public class Parser {
 
 // statements parsing
     private Stmt statement() {
+        if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
         if (match(LEFT_BRACE)) return new Stmt.Block(block());
 
@@ -312,5 +334,20 @@ public class Parser {
 
         consume(SEMICOLON, "Expect ';' after variable declaration.");
         return new Stmt.Var(name, initializer);
+    }
+
+    private  Stmt ifStatement(){
+
+        consume(LEFT_PAREN, "Expect '(' after 'if'.");
+        Expr condition = expression();
+        consume(RIGHT_PAREN, "Expect ')' after if condition.");
+
+        Stmt thenBranch = statement();
+        Stmt elseBranch = null;
+        if (match(ELSE)) {
+            elseBranch = statement();
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
     }
 }
