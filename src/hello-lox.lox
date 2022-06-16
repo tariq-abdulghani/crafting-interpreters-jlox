@@ -1,15 +1,23 @@
 print "this is lox file";
 
-var x = 10;
-var y = 0;
-var z = 0;
-var w = 0;
+for (var i = 0; i < 10; i=i+1) print i;
+// for i in [1:10]
+//
 
-y = z = w = x;
+var x = 50; var y = 60;
+print x+y;
 
-print z;
+// var class = 900;
 
-// print x;
+{
+    var x = 40;
+    print x;
+}
 
-// if (x < 5) print " x lt 5";
-// else print "x lg 5";
+// f(x) = x*x;
+// f(x,y) = {
+//    where x>0 -> x+y,
+//    where x <0  -> x-y
+// }
+
+print (5 + 10) * 10;
